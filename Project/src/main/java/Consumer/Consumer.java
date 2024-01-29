@@ -35,7 +35,7 @@ public class Consumer {
 
         KafkaSource<Event> source = createKafkaSource(IConstants.INPUT_TOPIC_NAME, new EventDeserializer());
         DataStream<Event> logStream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source", typeInfo);
-        DataStream<Event> alertsStream = getThreats(logStream);
+
 //        new thread for logging data
         Thread logsThread = new Thread(() -> {
             try {
@@ -44,6 +44,8 @@ public class Consumer {
                 throw new RuntimeException(e);
             }
         });
+
+        DataStream<Event> alertsStream = getThreats(logStream);
         Thread alertsThread = new Thread(() -> {
             try {
                 stream2Elastic(alertsStream, env, IConstants.esAlerts);

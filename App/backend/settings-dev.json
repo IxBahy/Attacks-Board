@@ -1,0 +1,6 @@
+{
+	"urls": {
+		"api": "http://localhost:5001",
+		"app": "http://localhost:3000"
+	}
+}
