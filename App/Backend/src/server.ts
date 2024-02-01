@@ -25,7 +25,7 @@ const io: socketio.Server = createSocket(app);
 
 io.on("connection", handleConnection);
 
-consume(({ from, to, message }) => {
-	console.log("hello", message);
+consume((value) => {
+	console.log(value);
 	// io.sockets.emit("newMessage", { from, to, message });
 });

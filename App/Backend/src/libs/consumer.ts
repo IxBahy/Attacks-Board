@@ -16,7 +16,7 @@ export const consume = async (cb) => {
 		eachMessage: async ({ topic, partition, message }) => {
 			const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`;
 			console.log(`- ${prefix} ${message.key}#${message.value}`);
-			// cb(message.value);
+			cb(message.value);
 		},
 	});
 };
