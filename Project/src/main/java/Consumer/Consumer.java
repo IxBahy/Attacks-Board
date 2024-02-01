@@ -143,6 +143,7 @@ public class Consumer {
     }
 
     private static void stream2Elastic(DataStream<Event> stream, StreamExecutionEnvironment env, String esIndex) throws Exception {
+        System.out.println("starting elastic stream");
         ElasticsearchSink<Event> esSink = new Elasticsearch7SinkBuilder<Event>()
                 .setBulkFlushMaxActions(1)
                 .setHosts(new HttpHost("127.0.0.1", 9200, "http"))

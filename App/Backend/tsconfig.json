@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"module": "ESNext",
+		"module": "CommonJS",
 		"esModuleInterop": true,
 		"target": "es2021",
 		"moduleResolution": "node",
@@ -8,7 +8,7 @@
 		"outDir": "dist"
 	},
 	"ts-node": {
-		"esm": true
+		// "esm": true
 	},
 	"lib": ["es2021"]
 }

@@ -25,14 +25,14 @@ services:
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 4
   zookeeper:
-    image: bitnami/zookeeper:latest
+    image: bitnami/zookeeper:3.9.1
     container_name: zookeeper
     ports:
       - "2181:2181"
     environment:
       ALLOW_ANONYMOUS_LOGIN: yes
   kafka:
-    image: bitnami/kafka:latest
+    image: bitnami/kafka:3.6.1
     container_name: kafka
     ports:
       - "9092:9092"
@@ -51,7 +51,12 @@ services:
     container_name: elasticsearch
     ports:
       - "9200:9200"
-    environment: ['CLI_JAVA_OPTS=-Xms2g -Xmx2g','bootstrap.memory_lock=true','discovery.type=single-node']
+    environment:
+      [
+        "CLI_JAVA_OPTS=-Xms2g -Xmx2g",
+        "bootstrap.memory_lock=true",
+        "discovery.type=single-node",
+      ]
 
     networks:
       - elk
@@ -66,6 +71,21 @@ services:
       - elk
     depends_on:
       - elasticsearch
+  postgres:
+    image: postgres:16
+    command:
+      ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: attack_board
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 networks:
   elk:
