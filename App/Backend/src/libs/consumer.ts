@@ -2,7 +2,7 @@ import { Kafka } from "kafkajs";
 
 const kafka = new Kafka({
 	clientId: "client-1",
-	brokers: ["localhost:9092"],
+	brokers: [process.env.BROKER_URL],
 });
 
 const topic = "attacks-output-stream" as const;

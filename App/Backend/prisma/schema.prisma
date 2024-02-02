@@ -12,11 +12,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  userName String @unique
-  password String
+  userName  String   @unique
+  password  String
 }
 
+enum SEVERITY_TYPES {
+  high
+  low
+  medium
+}
+
+model AttackCategory {
+  id                String              @id @default(uuid())
+  createdAt         DateTime            @default(now())
+  name              String              @unique
+  severity          SEVERITY_TYPES
+  AttackSubCategory AttackSubCategory[]
+}
+
+model AttackSubCategory {
+  id               String         @id @default(uuid())
+  createdAt        DateTime       @default(now())
+  name             String         @unique
+  attackCategoryId String
+  attackCategory   AttackCategory @relation(fields: [attackCategoryId], references: [id])
+}
+
+model Record {
+  id          String         @id @default(uuid())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime
+  attackName  String
+  attackCount Int
+  severity    SEVERITY_TYPES
+}
