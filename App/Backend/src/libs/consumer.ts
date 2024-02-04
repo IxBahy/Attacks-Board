@@ -1,15 +1,16 @@
 import { Kafka } from "kafkajs";
+import "dotenv/config";
 
 const kafka = new Kafka({
 	clientId: "client-1",
-	brokers: [process.env.BROKER_URL],
+	brokers: ["localhost:9092"],
 });
 
 const topic = "attacks-output-stream" as const;
 const GROUP_ID = "test-group" as const;
 const consumer = kafka.consumer({ groupId: GROUP_ID });
 
-export const consume = async (cb) => {
+export const consume = async (cb: (Buffer) => any) => {
 	await consumer.connect();
 	await consumer.subscribe({ topic, fromBeginning: true });
 	await consumer.run({

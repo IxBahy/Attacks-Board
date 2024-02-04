@@ -31,6 +31,7 @@ model AttackCategory {
   name              String              @unique
   severity          SEVERITY_TYPES
   AttackSubCategory AttackSubCategory[]
+  AttackCount       AttackCount[]
 }
 
 model AttackSubCategory {
@@ -41,11 +42,21 @@ model AttackSubCategory {
   attackCategory   AttackCategory @relation(fields: [attackCategoryId], references: [id])
 }
 
-model Record {
-  id          String         @id @default(uuid())
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime
-  attackName  String
-  attackCount Int
-  severity    SEVERITY_TYPES
+model Snapshot {
+  id                  String         @id @default(uuid())
+  createdAt           DateTime       @default(now())
+  averageSeverity     SEVERITY_TYPES
+  trustedIpPercentage Int
+  mostVulnerablePort  String
+  mostCommonAttackId  String
+  attackCount         AttackCount    @relation(fields: [mostCommonAttackId], references: [id])
+}
+
+model AttackCount {
+  id             String         @id @default(uuid())
+  createdAt      DateTime       @default(now())
+  count          Int
+  attackId       String
+  attackCategory AttackCategory @relation(fields: [attackId], references: [id])
+  Snapshot       Snapshot[]
 }

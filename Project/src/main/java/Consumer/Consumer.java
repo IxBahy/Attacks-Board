@@ -112,7 +112,7 @@ public class Consumer {
 
         if (Objects.equals(attack.mainCategory, "DoS")) {
             isUnknown = true;
-            severityIndex.incrementAndGet();
+            severityIndex.addAndGet(2);
             if (Objects.equals(attack.subCategory, "TFTP") || Objects.equals(attack.subCategory, "SSL") || Objects.equals(attack.subCategory, "FTP")) {
                 severityIndex.incrementAndGet();
             }
@@ -160,7 +160,7 @@ public class Consumer {
         String id = Arrays.stream(element.name.split("\\s+"))
                 .limit(2)
                 .reduce((a, b) -> a + " " + b)
-                .orElse("") + randomNumber;
+                .orElse("") +"-"+randomNumber;
         IndexRequest request = Requests.indexRequest()
                 .index(index)
                 .id(id)
