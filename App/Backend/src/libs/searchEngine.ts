@@ -1,11 +1,10 @@
 import { Client } from "@elastic/elasticsearch";
 import {
-	AggregationsAggregate,
 	CountRequest,
 	CountResponse,
 	QueryDslQueryContainer,
 	SearchRequest,
-	SearchResponseBody,
+	SearchResponse,
 } from "@elastic/elasticsearch/lib/api/types";
 import "dotenv/config";
 
@@ -13,35 +12,10 @@ import "dotenv/config";
 //////////////////////////Types/////////////////////////
 ////////////////////////////////////////////////////////
 
-type OneToThreeDigits =
-	| `${number}`
-	| `${number}${number}`
-	| `${number}${number}${number}`;
-
-type IpAddress =
-	`${OneToThreeDigits}.${OneToThreeDigits}.${OneToThreeDigits}.${OneToThreeDigits}`;
-
-type QueryTypes = "range" | "match" | "bool";
-
-type AttackFields =
-	| "mainCategory"
-	| "subCategory"
-	| "protocol"
-	| "sourcePort"
-	| "destinationPort"
-	| "name"
-	| "id"
-	| "sourceIP"
-	| "severity"
-	| "authorizedIp";
-
-type allowedQueryTypes<T extends AttackFields> = T extends Extract<
-	AttackFields,
-	"sourceIP"
->
+type allowedQueryTypes<T extends AttackFields> = T extends "sourceIP"
 	? QueryTypes
 	: Exclude<QueryTypes, "range">;
-
+type QueryValue = string | [IpAddress, IpAddress] | string[];
 const client = new Client({ node: process.env.ELASTIC_URL });
 
 export const count = async (
@@ -59,21 +33,26 @@ export const count = async (
 
 export async function query<T extends AttackFields>(
 	field: "sourceIP",
-	type: Extract<keyof QueryDslQueryContainer, "range">,
+	type: "range",
 	value: [IpAddress, IpAddress]
-): Promise<SearchResponseBody<unknown, Record<string, AggregationsAggregate>>>;
+): Promise<SearchResponse>;
 
 export async function query<T extends AttackFields>(
 	field: T,
-	type: Exclude<QueryTypes, "range">,
+	type: "match",
 	value: string
-): Promise<SearchResponseBody<unknown, Record<string, AggregationsAggregate>>>;
+): Promise<SearchResponse>;
+export async function query<T extends AttackFields>(
+	field: T,
+	type: "bool",
+	value: string[]
+): Promise<SearchResponse>;
 
 export async function query<T extends AttackFields>(
 	field: T,
 	type: Extract<keyof QueryDslQueryContainer, QueryTypes>,
-	value: string | [IpAddress, IpAddress]
-): Promise<SearchResponseBody<unknown, Record<string, AggregationsAggregate>>> {
+	value: QueryValue
+): Promise<SearchResponse> {
 	const query: QueryDslQueryContainer = createQuery(type, field, value);
 	const queryBody: SearchRequest = {
 		index: "attack-alerts",
@@ -86,26 +65,32 @@ export async function query<T extends AttackFields>(
 const createQuery = (
 	type: QueryTypes,
 	field: AttackFields,
-	value: string | [IpAddress, IpAddress]
+	value: QueryValue
 ): QueryDslQueryContainer => {
-	const query: QueryDslQueryContainer = {};
-	if (typeof value === "string") {
-		if (type === "bool") {
-			createFilterRequest(query, field, value);
-		} else if (type === "match") {
-			createMatchRequest(query, field, value);
-		}
-	} else if (typeof value !== "string") {
-		createRangeRequest(query, field, value);
+	let query: QueryDslQueryContainer;
+	if (type === "bool" && Array.isArray(value)) {
+		console.log(1);
+		query = createFilterRequest(field, value);
+	} else if (type === "match" && typeof value === "string") {
+		console.log(2);
+		query = createMatchRequest(field, value);
+	} else if (typeof value !== "string" && !Array.isArray(value)) {
+		console.log(3);
+		query = createRangeRequest(field, value);
 	}
+	console.log(query);
+
 	return query;
 };
 
 const createRangeRequest = (
-	query: QueryDslQueryContainer,
 	field: AttackFields,
 	value: [IpAddress, IpAddress]
 ): QueryDslQueryContainer => {
+	const query: QueryDslQueryContainer = {
+		range: {},
+	};
+
 	query["range"][field] = {
 		lte: value[0],
 		gte: value[1],
@@ -113,28 +98,32 @@ const createRangeRequest = (
 	return query;
 };
 const createFilterRequest = (
-	query: QueryDslQueryContainer,
 	field: AttackFields,
-	value: string
+	value: string[]
 ): QueryDslQueryContainer => {
 	const filter = {};
-	filter[field] = value;
-	query["bool"]["filter"] = [filter];
+	filter[`${field}.keyword`] = value;
+	const query: QueryDslQueryContainer = {
+		bool: {
+			filter: [{ terms: filter }],
+		},
+	};
 	return query;
 };
+
 const createMatchRequest = (
-	query: QueryDslQueryContainer,
 	field: AttackFields,
 	value: string
 ): QueryDslQueryContainer => {
+	const query: QueryDslQueryContainer = {
+		match: {},
+	};
 	query["match"][field] = value;
 	return query;
 };
 
 const getIndexData = async (
 	requestConfig: SearchRequest
-): Promise<
-	SearchResponseBody<unknown, Record<string, AggregationsAggregate>>
-> => {
+): Promise<SearchResponse> => {
 	return await client.search(requestConfig);
 };

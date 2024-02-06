@@ -3,17 +3,20 @@ import { Express } from "express";
 import * as socketio from "socket.io";
 import { consume } from "./libs/consumer";
 import { createSocket } from "./libs/websocket";
-import { query } from "./libs/searchEngine";
+import { searchRouter } from "./routes/searchRoutes";
+import morgan from "morgan";
+import cors from "cors";
 const app: Express = express();
-const port = 3000;
 
+const port = 3000;
+app.use(morgan("dev"));
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/query", searchRouter);
 app.get("/", (req, res) => {
-	const queyIndex = async () => {
-		const data = await query("sourceIP", "range", ["0.0.0.0", "0.0.0.0"]);
-		const value = await data.hits;
-		// console.log(value);
-	};
-	queyIndex();
+	console.log("hi");
 });
 
 app.listen(port, () => {
