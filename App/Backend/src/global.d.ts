@@ -3,6 +3,7 @@ type JSONObject = { [k: string]: JSONValue };
 type JSONArray = JSONValue[];
 type JSONValue = JSONArray | JSONObject | JSONPrimitive;
 
+type esIndexes = "attack-log" | "attack-alerts";
 type QueryTypes = "range" | "match" | "bool";
 
 type AttackFields =

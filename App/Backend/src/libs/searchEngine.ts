@@ -18,12 +18,15 @@ type allowedQueryTypes<T extends AttackFields> = T extends "sourceIP"
 type QueryValue = string | [IpAddress, IpAddress] | string[];
 const client = new Client({ node: process.env.ELASTIC_URL });
 
+////////////////////////////////// Count FUNCTION //////////////////////////////////
+
 export const count = async (
+	index: esIndexes,
 	field?: AttackFields,
 	filterValue?: string
 ): Promise<CountResponse> => {
 	const requestBody: CountRequest = {
-		index: "attack-alerts",
+		index: index,
 	};
 	if (field && filterValue) {
 		requestBody["query"]["match"][field] = filterValue;
@@ -31,6 +34,7 @@ export const count = async (
 	return await client.count(requestBody);
 };
 
+////////////////////////////////// QUERY FUNCTION //////////////////////////////////
 export async function query<T extends AttackFields>(
 	field: "sourceIP",
 	type: "range",

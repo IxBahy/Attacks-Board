@@ -8,7 +8,7 @@ import morgan from "morgan";
 import cors from "cors";
 const app: Express = express();
 
-const port = 3000;
+const port = 5000;
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
@@ -33,7 +33,7 @@ const io: socketio.Server = createSocket(app);
 
 io.on("connection", handleConnection);
 
-consume((value: Buffer) => {
+consume((value: string) => {
 	console.log(value);
-	// io.sockets.emit(value);
+	io.sockets.emit(value);
 });

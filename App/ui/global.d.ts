@@ -1,0 +1,1 @@
+type href = `#${string}` | `/${string}`;

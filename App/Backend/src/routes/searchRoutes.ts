@@ -67,8 +67,14 @@ searchRouter.get(
 );
 
 searchRouter.get("/count", async (req: Request, res: Response) => {
+	const index = req.query.index as esIndexes;
+	if (!index) {
+		res.status(400);
+		res.send("index parameter is missing");
+		return;
+	}
 	const queyIndex = async () => {
-		const data = await count();
+		const data = await count(index);
 		const countValue = await data.count;
 		return countValue;
 	};
