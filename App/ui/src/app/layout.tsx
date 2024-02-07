@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import SideNav from "@/components/Layout/Sidenav";
-import LayoutRightSide from "@/components/Layout/LayoutRightSide";
+import LayoutRightSide from "@/components/Layout/LayoutLeftSide";
+import Sidenav from "@/components/Layout/SideNav";
+import Footer from "@/components/Layout/Footer";
 export const fontSans = FontSans({
 	subsets: ["latin"],
 	variable: "--font-sans",
@@ -27,9 +28,10 @@ export default function RootLayout({
 					fontSans.variable
 				)}
 			>
-				<SideNav />
-				{children}
 				<LayoutRightSide />
+				{children}
+				<Sidenav />
+				<Footer />
 			</body>
 		</html>
 	);

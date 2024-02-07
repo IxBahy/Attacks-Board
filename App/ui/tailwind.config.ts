@@ -18,6 +18,11 @@ const config = {
 			},
 		},
 		extend: {
+			boxShadow: {
+				stack: ` 5px 5px rgba(0, 98, 90, 0.4), 10px 10px rgba(0, 98, 90, 0.3), 15px 15px rgba(0, 98, 90, 0.2), 20px 20px rgba(0, 98, 90, 0.1), 25px 25px rgba(0, 98, 90, 0.05);
+					--tw-shadow-colored: 5px 5px var(--tw-shadow-color), 10px 10px var(--tw-shadow-color), 15px 15px var(--tw-shadow-color), 20px 20px var(--tw-shadow-color), 25px 25px var(--tw-shadow-color)`,
+				cover: "0px 4px 32px -2px var(--tw-shadow-colored)",
+			},
 			fontFamily: {
 				sans: ["var(--font-sans)", ...fontFamily.sans],
 			},
