@@ -85,9 +85,14 @@
 
   body {
     @apply bg-background text-foreground;
-    @apply scroll-smooth
   }
 
+}
+
+*,
+html {
+
+  scroll-behavior: smooth !important;
 }
 
 footer {
