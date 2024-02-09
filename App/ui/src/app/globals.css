@@ -95,6 +95,37 @@ html {
   scroll-behavior: smooth !important;
 }
 
+
+.attack-list .attack-list__item {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 8rem;
+  opacity: 0;
+  transform: translateY(-8rem);
+  transition: all 600ms ease-out;
+}
+
+.attack-list .attack-list__item.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.attack-list__item.show:not(:first-child) {
+  margin-top: 50px;
+}
+
+.attack-list__item .attack-card {
+  opacity: 0;
+  transform: translateY(-8rem);
+}
+
+.attack-list__item .attack-card.show {
+  opacity: 1;
+  transform: translateY(0);
+  height: 8rem;
+}
+
 footer {
   height: 6rem;
   width: 3.5px;

@@ -1,3 +1,5 @@
+"use client";
+
 import Dashboard from "@/components/Sections/Dashboard";
 import Search from "@/components/Sections/Search";
 import Snapshots from "@/components/Sections/Snapshots";
