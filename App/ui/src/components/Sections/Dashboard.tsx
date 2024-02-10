@@ -1,14 +1,42 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import AttackCard from "../Cards/AttackCard";
+let i = 0;
 const Dashboard = () => {
-	const [attacks, setAttacks] = useState<{}[]>([]);
+	const [attacks, setAttacks] = useState<{ id: number }[]>([]);
+	const [pauseModifications, setPauseModifications] = useState(false);
 	const listRef = useRef<HTMLUListElement>(null);
-	const handleAdd = (): void => {
-		if (attacks.length >= 5) return;
-		setAttacks([{}, ...attacks]);
+
+	useEffect(() => {
+		console.log("a3a3a3", pauseModifications);
+		if (pauseModifications) return;
+
+		const timeout = setTimeout(() => {
+			setPauseModifications;
+			handleRemove();
+		}, 3500);
+
+		return () => clearTimeout(timeout);
+	}, [attacks]);
+
+	const handleAdd = (): false | true => {
+		if (pauseModifications) {
+			return false;
+		}
+		if (attacks.length > 5) {
+			handleRemove((newArr) => {
+				setAttacks([{ id: i }, ...newArr]);
+				i = i + 1;
+			});
+		} else {
+			setAttacks([{ id: i }, ...attacks]);
+			i = i + 1;
+		}
+		return true;
 	};
-	const handleRemove = (): void => {
+	const handleRemove = (cb?: (arr: { id: number }[]) => void): void => {
+		if (pauseModifications) return;
+		setPauseModifications(true);
 		if (attacks.length > 0) {
 			const cards = listRef.current?.children;
 			if (!cards) return;
@@ -18,20 +46,14 @@ const Dashboard = () => {
 				const newArr = [...attacks];
 				newArr.pop();
 				setAttacks(newArr);
+				setPauseModifications(false);
+				if (cb) {
+					cb(newArr);
+				}
 			}, 600);
 		}
 	};
 
-	useEffect(() => {
-		console.log("a3a3a3");
-
-		const timeout = setTimeout(() => {
-			handleRemove();
-			console.log("inner");
-		}, 2500);
-
-		return () => clearTimeout(timeout);
-	}, [attacks]);
 	return (
 		<section
 			id="Dashboard"

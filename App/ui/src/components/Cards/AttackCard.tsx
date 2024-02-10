@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { RefObject, useEffect, useRef } from "react";
 interface Props {
-	attack: {};
+	attack: { id: number };
 }
 const AttackCard = ({ attack }: Props) => {
 	// const color= attacks.severity === "high"? "darkred":  attacks.severity === "medium" ? "yellow" : "greem"
@@ -27,7 +27,7 @@ const AttackCard = ({ attack }: Props) => {
 				className="attack-card  absolute top-0 left-0 duration-500 ease-out h-32 w-full bg-slate-900 text-gray-100 border-none shadow-[7px_7px_0px_0px_darkred]"
 			>
 				<CardHeader>
-					<CardTitle>Card Title</CardTitle>
+					<CardTitle>Card Title {attack.id}</CardTitle>
 					<CardDescription>Card Description</CardDescription>
 				</CardHeader>
 				<CardContent>
