@@ -8,20 +8,16 @@ import { handleInputError } from "../middlewares/handleErrors";
 ////////////////// Type Guards ///////////////////////
 //////////////////////////////////////////////////////
 
-const isIpRange = (input: unknown): input is [IpAddress, IpAddress] => {
-	return (
-		typeof Array.isArray(input) &&
-		typeof input[0] === "string" &&
-		typeof input[1] === "string" &&
-		input[0].split(".").length === 4 &&
-		input[1].split(".").length === 4
-	);
+export const isIpRange = (input: unknown): input is [IpAddress, IpAddress] => {
+	if (!isStrArray(input)) return false;
+	return input[0].split(".").length === 4 && input[1].split(".").length === 4;
 };
-const isStrArray = (input: unknown): input is string[] => {
+export const isStrArray = (input: unknown): input is string[] => {
 	return (
 		Array.isArray(input) && input.length > 0 && typeof input[0] === "string"
 	);
 };
+
 //////////////////////////////////////////////////////
 ///////////////////// Routes /////////////////////////
 //////////////////////////////////////////////////////

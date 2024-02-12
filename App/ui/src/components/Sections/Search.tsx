@@ -23,7 +23,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
 import React from "react";
-
+import { isStrArray } from "@/Utlis/TypeGuards";
+type FormObjectEvent = {
+	field:
+		| "mainCategory"
+		| "subCategory"
+		| "protocol"
+		| "sourcePort"
+		| "destinationPort"
+		| "name"
+		| "id"
+		| "sourceIP"
+		| "severity"
+		| "authorizedIp";
+	type: "match" | "bool" | "range";
+	value: string | string[];
+};
 const Search = () => {
 	const formSchema = z.object({
 		field: z.enum([
@@ -39,13 +54,13 @@ const Search = () => {
 			"authorizedIp",
 		]),
 		type: z.enum(["match", "bool", "range"]),
-		value: z.union([z.string(), z.array(z.string().ip()).max(2)]),
+		firstValue: z.union([z.string().ip(), z.string()]),
+		secondValue: z.string().ip().optional(),
 	});
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 	});
-	console.log(form.getValues().field);
-	type valueField = ControllerRenderProps<z.infer<typeof formSchema>, "value">;
+
 	const queryTypes: [QueryTypes, string][] =
 		form.watch().field === "sourceIP"
 			? [
@@ -59,13 +74,92 @@ const Search = () => {
 			  ];
 
 	const valueFormComponents: {
-		[k in QueryTypes]: (field: valueField) => React.JSX.Element;
+		[k in QueryTypes]: () => React.JSX.Element;
 	} = {
-		bool: (field: valueField) => <>bool</>,
-		match: (field: valueField) => <>match</>,
-		range: (field: valueField) => <>range</>,
+		bool: () => (
+			<FormField
+				control={form.control}
+				name="firstValue"
+				render={({ field }) => (
+					<FormItem className="min-w-60">
+						<FormLabel>Value</FormLabel>
+						<FormControl>
+							<Input placeholder="Value" {...field} value={field.value ?? ""} />
+						</FormControl>
+						<FormDescription>type the value You want to Filter</FormDescription>
+						<FormMessage />
+					</FormItem>
+				)}
+			/>
+		),
+		match: () => (
+			<FormField
+				control={form.control}
+				name="firstValue"
+				render={({ field }) => (
+					<FormItem className="min-w-60">
+						<FormLabel>Value</FormLabel>
+						<FormControl>
+							<Input placeholder="Value" {...field} value={field.value ?? ""} />
+						</FormControl>
+						<FormDescription>type the value You want to match</FormDescription>
+						<FormMessage />
+					</FormItem>
+				)}
+			/>
+		),
+		range: () => {
+			return (
+				<>
+					<FormField
+						control={form.control}
+						name="firstValue"
+						render={({ field }) => (
+							<FormItem className="min-w-60 ">
+								<FormLabel>First</FormLabel>
+								<FormControl className="!my-4">
+									<Input
+										placeholder="IP"
+										{...field}
+										value={field.value ?? ""}
+									/>
+								</FormControl>
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="secondValue"
+						render={({ field }) => (
+							<FormItem className="min-w-60 ">
+								<FormLabel>Second</FormLabel>
+								<FormControl className="!my-4">
+									<Input
+										placeholder="IP"
+										{...field}
+										value={field.value ?? ""}
+									/>
+								</FormControl>
+							</FormItem>
+						)}
+					/>
+				</>
+			);
+		},
 	};
-	const valueComponent = valueFormComponents[form.watch().type];
+	const valueComponent =
+		valueFormComponents[form.watch().type] ||
+		(() => <p>Select the Query type</p>);
+	const isIPAddress = (val: string): boolean => {
+		const { success } = z.string().ip().safeParse(val);
+		return success;
+	};
+
+	const handleSubmit = (e: FormObjectEvent) => {
+		if (form.formState.isValid) {
+			console.log(e);
+		}
+	};
 
 	return (
 		<section
@@ -80,16 +174,38 @@ const Search = () => {
 							onSubmit={(e) => {
 								e.preventDefault();
 								form.handleSubmit((e) => {
-									console.log(e);
+									const payload: FormObjectEvent = {
+										field: e.field,
+										type: e.type,
+									} as FormObjectEvent;
+									if (e.type === "range") {
+										if (
+											e.firstValue &&
+											e.secondValue &&
+											isIPAddress(e.firstValue)
+										) {
+											payload.value = [e.firstValue, e.secondValue];
+										} else {
+											form.setError("firstValue", {
+												type: "validate",
+												message: "both values must be IP addresses",
+											});
+										}
+									} else {
+										payload.value = e.firstValue;
+									}
+									if (payload.value) {
+										handleSubmit(payload);
+									}
 								})();
 							}}
-							className="space-y-8"
+							className="space-y-8 flex flex-col items-center"
 						>
 							<FormField
 								control={form.control}
 								name="field"
 								render={({ field }) => (
-									<FormItem>
+									<FormItem className="min-w-60">
 										<FormLabel>field</FormLabel>
 										<Select
 											onValueChange={field.onChange}
@@ -126,7 +242,6 @@ const Search = () => {
 										<FormDescription>
 											from the fields in the attack object
 										</FormDescription>
-										<FormMessage />
 									</FormItem>
 								)}
 							/>
@@ -134,7 +249,7 @@ const Search = () => {
 								control={form.control}
 								name="type"
 								render={({ field }) => (
-									<FormItem>
+									<FormItem className="my-4 min-w-60">
 										<FormLabel>type</FormLabel>
 										<Select
 											onValueChange={field.onChange}
@@ -145,9 +260,11 @@ const Search = () => {
 											</SelectTrigger>
 											<SelectContent>
 												<SelectGroup>
-													{queryTypes.map(([value, name]) => {
+													{queryTypes.map(([value, name], index) => {
 														return (
-															<SelectItem value={value}>{name}</SelectItem>
+															<SelectItem key={index} value={value}>
+																{name}
+															</SelectItem>
 														);
 													})}
 												</SelectGroup>
@@ -156,21 +273,15 @@ const Search = () => {
 										<FormDescription>
 											The type of Query you want to perform
 										</FormDescription>
-										<FormMessage />
 									</FormItem>
 								)}
 							/>
-							<FormField
-								control={form.control}
-								name="value"
-								render={({ field }) => {
-									if (valueComponent) {
-										return valueComponent(field);
-									}
-									return <></>;
-								}}
-							/>
-							<Button type="submit">Submit</Button>
+							<div className="min-h-48 flex flex-col items-center min-w-60 text-center !mb-6">
+								{valueComponent()}
+							</div>
+							<div className="w-60 flex justify-end ">
+								<Button type="submit">Submit</Button>
+							</div>
 						</form>
 					</Form>
 				</div>

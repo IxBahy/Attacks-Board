@@ -9,7 +9,6 @@ const Dashboard = () => {
 	const listRef = useRef<HTMLUListElement>(null);
 
 	useEffect(() => {
-		console.log("a3a3a3", pauseModifications);
 		if (pauseModifications) return;
 
 		const timeout = setTimeout(() => {
