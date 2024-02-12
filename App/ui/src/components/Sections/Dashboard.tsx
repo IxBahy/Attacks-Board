@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import AttackCard from "../Cards/AttackCard";
+import Title from "../ui/Title";
 let i = 0;
 const Dashboard = () => {
 	const [attacks, setAttacks] = useState<{ id: number }[]>([]);
@@ -14,16 +15,18 @@ const Dashboard = () => {
 		const timeout = setTimeout(() => {
 			setPauseModifications;
 			handleRemove();
-		}, 3500);
+		}, 2000);
 
 		return () => clearTimeout(timeout);
 	}, [attacks]);
 
 	const handleAdd = (): false | true => {
+		console.log("test", pauseModifications);
+
 		if (pauseModifications) {
 			return false;
 		}
-		if (attacks.length > 5) {
+		if (attacks.length >= 5) {
 			handleRemove((newArr) => {
 				setAttacks([{ id: i }, ...newArr]);
 				i = i + 1;
@@ -36,8 +39,8 @@ const Dashboard = () => {
 	};
 	const handleRemove = (cb?: (arr: { id: number }[]) => void): void => {
 		if (pauseModifications) return;
-		setPauseModifications(true);
 		if (attacks.length > 0) {
+			setPauseModifications(true);
 			const cards = listRef.current?.children;
 			if (!cards) return;
 			const card = cards[cards?.length - 1];
@@ -57,11 +60,9 @@ const Dashboard = () => {
 	return (
 		<section
 			id="Dashboard"
-			className="flex flex-col items-center min-h-screen w-full "
+			className="flex flex-col items-center min-h-[150vh] w-full "
 		>
-			<h2 className="text-4xl font-bold bg-gradient-to-r from-purple-800  via-blue-600 to-blue-400 bg-clip-text text-transparent">
-				Dashboard
-			</h2>
+			<Title text="Dashboard" />
 			<button onClick={handleAdd}>add</button>
 			<ul className="w-full attack-list" ref={listRef}>
 				{attacks.map((attack, index) => {

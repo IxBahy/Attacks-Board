@@ -1,8 +1,10 @@
+import Title from "../ui/Title";
+
 const LayoutLeftSide = () => {
 	return (
 		<>
 			<article className="sticky left-0 top-0 h-screen w-[20vw] flex flex-col items-center justify-center  ">
-				<h1 className="text-3xl font-mono">Attack Board</h1>
+				<Title text="Attack Board" />
 
 				<div className="ps-8 pt-8 font-mono h-4/5">
 					<p>

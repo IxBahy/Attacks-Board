@@ -1,4 +1,5 @@
 import React from "react";
+import Title from "../ui/Title";
 
 const Status = () => {
 	return (
@@ -6,7 +7,7 @@ const Status = () => {
 			id="Status"
 			className="flex flex-col items-center w-full min-h-screen pt-16"
 		>
-			Status
+			<Title text="Status" />
 		</section>
 	);
 };
