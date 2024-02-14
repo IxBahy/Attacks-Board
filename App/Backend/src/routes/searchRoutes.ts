@@ -25,14 +25,19 @@ export const isStrArray = (input: unknown): input is string[] => {
 export const searchRouter = Router();
 searchRouter.get(
 	"/",
-	body("field").exists().isString(),
-	body("type").exists().isString(),
-	body("value").exists(),
+	// body("field").exists().isString(),
+	// body("type").exists().isString(),
+	// body("value").exists(),
 	handleInputError,
 	async (req: Request, res: Response) => {
-		const queryField = req.body.field as AttackFields;
-		const queryType = req.body.type as QueryTypes;
-		const queryValue = req.body.value;
+		const queryField = req.query.field as AttackFields;
+		const queryType = req.query.type as QueryTypes;
+		const queryValue = req.query.value;
+		console.log(":::::::::::::::::::", typeof queryValue);
+
+		// const queryField = req.body.field;
+		// const queryType = req.body.type;
+		// const queryValue = req.body.value;
 
 		let response: SearchResponse;
 
@@ -47,9 +52,10 @@ searchRouter.get(
 		} else if (queryType === "match" && typeof queryValue === "string") {
 			console.log("sec");
 			response = await query(queryField, "match", queryValue);
-		} else if (queryType === "bool" && isStrArray(queryValue)) {
+			// } else if (queryType === "bool" && isStrArray(queryValue)) {
+		} else if (queryType === "bool" && typeof queryValue === "string") {
 			console.log("Third");
-			response = await query(queryField, "bool", queryValue);
+			response = await query(queryField, "bool", [queryValue]);
 		} else {
 			res.status(400);
 			res.json({

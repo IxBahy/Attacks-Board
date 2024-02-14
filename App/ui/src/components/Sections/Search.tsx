@@ -1,3 +1,4 @@
+"use client";
 import { ControllerRenderProps, useForm } from "react-hook-form";
 import Title from "../ui/Title";
 import { z } from "zod";
@@ -22,9 +23,26 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
-import React from "react";
+import React, { useState } from "react";
 import { isStrArray } from "@/Utlis/TypeGuards";
+import { SearchResponse } from "elasticsearch";
 type FormObjectEvent = {
+	field:
+		| "mainCategory"
+		| "subCategory"
+		| "protocol"
+		| "sourcePort"
+		| "destinationPort"
+		| "name"
+		| "id"
+		| "sourceIP"
+		| "severity"
+		| "authorizedIp";
+	type: "match" | "bool" | "range";
+	firstValue: string;
+	secondValue?: string | undefined;
+};
+type RequestPayload = {
 	field:
 		| "mainCategory"
 		| "subCategory"
@@ -40,6 +58,7 @@ type FormObjectEvent = {
 	value: string | string[];
 };
 const Search = () => {
+	const [queryResponse, setQueryResponse] = useState({});
 	const formSchema = z.object({
 		field: z.enum([
 			"mainCategory",
@@ -156,11 +175,57 @@ const Search = () => {
 	};
 
 	const handleSubmit = (e: FormObjectEvent) => {
-		if (form.formState.isValid) {
-			console.log(e);
+		const payload: RequestPayload = {
+			field: e.field,
+			type: e.type,
+		} as RequestPayload;
+		if (e.type === "range") {
+			if (e.firstValue && e.secondValue && isIPAddress(e.firstValue)) {
+				payload.value = [e.firstValue, e.secondValue];
+				form.clearErrors("firstValue");
+				form.clearErrors("secondValue");
+			} else {
+				form.setError("firstValue", {
+					type: "validate",
+					message: "both values must be IP addresses",
+				});
+			}
+		} else {
+			payload.value = e.firstValue;
+		}
+		if (payload.value) {
+			handleSendRequest(payload);
+		}
+	};
+	const handleSendRequest = async (payload: RequestPayload) => {
+		if (Object.keys(form.formState.errors).length === 0) {
+			console.log(payload);
+
+			const result = await fetch(
+				`http://localhost:5000/query?field=${payload.field}&type=${payload.type}&value=${payload.value}`,
+				{
+					method: "GET",
+				}
+			)
+				.then((response) => {
+					if (!response.ok) {
+						throw new Error(response.statusText);
+					}
+					return response.json() as Promise<{
+						data: SearchResponse<AttackEvent>;
+					}>;
+				})
+				.then((data) => {
+					return data.data;
+				});
+			console.log(Object.keys(result.hits.hits).length);
+
+			setQueryResponse(result.hits.hits);
 		}
 	};
 
+	const PrettyPrintJson = (data: { [k: string]: any }) =>
+		JSON.stringify(data, null, "  ");
 	return (
 		<section
 			id="Search"
@@ -173,31 +238,7 @@ const Search = () => {
 						<form
 							onSubmit={(e) => {
 								e.preventDefault();
-								form.handleSubmit((e) => {
-									const payload: FormObjectEvent = {
-										field: e.field,
-										type: e.type,
-									} as FormObjectEvent;
-									if (e.type === "range") {
-										if (
-											e.firstValue &&
-											e.secondValue &&
-											isIPAddress(e.firstValue)
-										) {
-											payload.value = [e.firstValue, e.secondValue];
-										} else {
-											form.setError("firstValue", {
-												type: "validate",
-												message: "both values must be IP addresses",
-											});
-										}
-									} else {
-										payload.value = e.firstValue;
-									}
-									if (payload.value) {
-										handleSubmit(payload);
-									}
-								})();
+								form.handleSubmit(handleSubmit)();
 							}}
 							className="space-y-8 flex flex-col items-center"
 						>
@@ -276,7 +317,7 @@ const Search = () => {
 									</FormItem>
 								)}
 							/>
-							<div className="min-h-48 flex flex-col items-center min-w-60 text-center !mb-6">
+							<div className="min-h-48 flex flex-col items-center min-w-60 text-center ">
 								{valueComponent()}
 							</div>
 							<div className="w-60 flex justify-end ">
@@ -285,8 +326,8 @@ const Search = () => {
 						</form>
 					</Form>
 				</div>
-				<div className="flex border flex-col justify-center items-center w-1/2 h-full">
-					HI
+				<div className="flex flex-col justify-center items-center w-1/2 h-full">
+					{queryResponse && PrettyPrintJson(queryResponse)}
 				</div>
 			</div>
 		</section>

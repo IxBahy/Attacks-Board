@@ -22,3 +22,16 @@ type IpAddress =
 	`${OneToThreeDigits}.${OneToThreeDigits}.${OneToThreeDigits}.${OneToThreeDigits}`;
 
 type filterValue = { [k in AttackFields]?: string };
+
+type AttackEvent = {
+	mainCategory: string;
+	subCategory: string;
+	protocol: "tcp" | "udp";
+	sourcePort: string;
+	destinationPort: string;
+	name: string;
+	id: string;
+	sourceIP: IpAddress;
+	severity: null | "low" | "medium" | "High";
+	authorizedIp: boolean;
+};

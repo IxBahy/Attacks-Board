@@ -27,3 +27,4 @@ type IpAddress =
 	`${OneToThreeDigits}.${OneToThreeDigits}.${OneToThreeDigits}.${OneToThreeDigits}`;
 
 type filterValue = { [k in AttackFields]?: string };
+
