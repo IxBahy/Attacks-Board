@@ -7,6 +7,7 @@ import {
 	SearchResponse,
 } from "@elastic/elasticsearch/lib/api/types";
 import "dotenv/config";
+import { isIpRange } from "../routes/searchRoutes";
 
 ////////////////////////////////////////////////////////
 //////////////////////////Types/////////////////////////
@@ -72,17 +73,23 @@ const createQuery = (
 	value: QueryValue
 ): QueryDslQueryContainer => {
 	let query: QueryDslQueryContainer;
+	console.log("here", type, field, value);
+
 	if (type === "bool" && Array.isArray(value)) {
 		console.log(1);
 		query = createFilterRequest(field, value);
 	} else if (type === "match" && typeof value === "string") {
 		console.log(2);
 		query = createMatchRequest(field, value);
-	} else if (typeof value !== "string" && !Array.isArray(value)) {
+	} else if (
+		type === "range" &&
+		typeof value !== "string" &&
+		isIpRange(value)
+	) {
 		console.log(3);
 		query = createRangeRequest(field, value);
 	}
-	console.log(query);
+	console.log("there", query);
 
 	return query;
 };
@@ -96,9 +103,11 @@ const createRangeRequest = (
 	};
 
 	query["range"][field] = {
-		lte: value[0],
-		gte: value[1],
+		gte: value[0],
+		lte: value[1],
 	};
+	console.log("HERE IS THE QUERY", query);
+
 	return query;
 };
 const createFilterRequest = (

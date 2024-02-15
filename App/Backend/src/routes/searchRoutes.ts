@@ -33,7 +33,6 @@ searchRouter.get(
 		const queryField = req.query.field as AttackFields;
 		const queryType = req.query.type as QueryTypes;
 		const queryValue = req.query.value;
-		console.log(":::::::::::::::::::", typeof queryValue);
 
 		// const queryField = req.body.field;
 		// const queryType = req.body.type;

@@ -26,6 +26,8 @@ import { Button } from "../ui/button";
 import React, { useState } from "react";
 import { isStrArray } from "@/Utlis/TypeGuards";
 import { SearchResponse } from "elasticsearch";
+import AttackCard from "../Cards/AttackCard";
+import QueryCard from "../Cards/QueryCard";
 type FormObjectEvent = {
 	field:
 		| "mainCategory"
@@ -58,7 +60,9 @@ type RequestPayload = {
 	value: string | string[];
 };
 const Search = () => {
-	const [queryResponse, setQueryResponse] = useState({});
+	const [queryResponse, setQueryResponse] = useState<
+		{ _source: AttackEvent; _score: number }[]
+	>([]);
 	const formSchema = z.object({
 		field: z.enum([
 			"mainCategory",
@@ -128,7 +132,7 @@ const Search = () => {
 			/>
 		),
 		range: () => {
-			return (
+			return form.watch().field == "sourceIP" ? (
 				<>
 					<FormField
 						control={form.control}
@@ -163,6 +167,8 @@ const Search = () => {
 						)}
 					/>
 				</>
+			) : (
+				<></>
 			);
 		},
 	};
@@ -200,13 +206,17 @@ const Search = () => {
 	const handleSendRequest = async (payload: RequestPayload) => {
 		if (Object.keys(form.formState.errors).length === 0) {
 			console.log(payload);
-
-			const result = await fetch(
-				`http://localhost:5000/query?field=${payload.field}&type=${payload.type}&value=${payload.value}`,
-				{
-					method: "GET",
-				}
-			)
+			const params = new URLSearchParams();
+			params.append("field", payload.field);
+			params.append("type", payload.type);
+			if (Array.isArray(payload.value)) {
+				payload.value.forEach((val: string) => params.append("value", val));
+			} else {
+				params.append("value", payload.value);
+			}
+			const result = await fetch(`http://localhost:5000/query?${params}`, {
+				method: "GET",
+			})
 				.then((response) => {
 					if (!response.ok) {
 						throw new Error(response.statusText);
@@ -218,23 +228,29 @@ const Search = () => {
 				.then((data) => {
 					return data.data;
 				});
-			console.log(Object.keys(result.hits.hits).length);
 
-			setQueryResponse(result.hits.hits);
+			console.log(result.hits.hits);
+
+			const top3Results = result.hits.hits
+				// .sort(({ _score: first }, { _score: second }) => second - first)
+				.slice(0, 3);
+
+			setQueryResponse(top3Results);
 		}
 	};
 
-	const PrettyPrintJson = (data: { [k: string]: any }) =>
-		JSON.stringify(data, null, "  ");
 	return (
 		<section
 			id="Search"
 			className="flex flex-col items-center w-full min-h-screen pt-16"
 		>
 			<Title text="Search" />
-			<div className="flex items-center w-full min-h-[80vh]">
+			<div className="flex items-center w-full min-h-[90vh] max-h-full">
 				<div className="flex  flex-col justify-center items-center w-1/2 h-full">
 					<Form {...form}>
+						<h6 className="text-xs text-muted-foreground text-center mb-4">
+							get the top3 matching values by using the search below
+						</h6>
 						<form
 							onSubmit={(e) => {
 								e.preventDefault();
@@ -326,8 +342,13 @@ const Search = () => {
 						</form>
 					</Form>
 				</div>
-				<div className="flex flex-col justify-center items-center w-1/2 h-full">
-					{queryResponse && PrettyPrintJson(queryResponse)}
+				<div className="flex flex-col relative justify-center truncate ms-4 max-w-1/2  h-full text-wrap whitespace-pre-wrap over">
+					{queryResponse &&
+						queryResponse.map(({ _source: event }) => (
+							<div className="my-2 w-full  ">
+								<QueryCard attackEvent={event} />
+							</div>
+						))}
 				</div>
 			</div>
 		</section>

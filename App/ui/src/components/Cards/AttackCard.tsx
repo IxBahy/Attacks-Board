@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { RefObject, useEffect, useRef } from "react";
 interface Props {
-	attack: { id: number };
+	attack: { id: number } | any;
 }
 const AttackCard = ({ attack }: Props) => {
 	// const color= attacks.severity === "high"? "darkred":  attacks.severity === "medium" ? "yellow" : "greem"

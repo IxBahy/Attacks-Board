@@ -32,6 +32,6 @@ type AttackEvent = {
 	name: string;
 	id: string;
 	sourceIP: IpAddress;
-	severity: null | "low" | "medium" | "High";
+	severity: null | "Low" | "Medium" | "High";
 	authorizedIp: boolean;
 };
