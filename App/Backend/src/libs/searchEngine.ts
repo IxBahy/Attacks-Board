@@ -112,13 +112,13 @@ const createRangeRequest = (
 };
 const createFilterRequest = (
 	field: AttackFields,
-	value: string[]
+	values: string[]
 ): QueryDslQueryContainer => {
 	const filter = {};
-	filter[`${field}.keyword`] = value;
+	filter[`${field}.keyword`] = values;
 	const query: QueryDslQueryContainer = {
 		bool: {
-			filter: [{ terms: filter }],
+			must_not: [{ terms: filter }],
 		},
 	};
 	return query;

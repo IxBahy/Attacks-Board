@@ -109,7 +109,9 @@ const Search = () => {
 						<FormControl>
 							<Input placeholder="Value" {...field} value={field.value ?? ""} />
 						</FormControl>
-						<FormDescription>type the value You want to Filter</FormDescription>
+						<FormDescription>
+							type the value You want to Filter seperated by ,
+						</FormDescription>
 						<FormMessage />
 					</FormItem>
 				)}
@@ -168,13 +170,15 @@ const Search = () => {
 					/>
 				</>
 			) : (
-				<></>
+				<p>Select the Query type</p>
 			);
 		},
 	};
+
 	const valueComponent =
 		valueFormComponents[form.watch().type] ||
 		(() => <p>Select the Query type</p>);
+
 	const isIPAddress = (val: string): boolean => {
 		const { success } = z.string().ip().safeParse(val);
 		return success;
@@ -196,6 +200,8 @@ const Search = () => {
 					message: "both values must be IP addresses",
 				});
 			}
+		} else if (e.type === "bool") {
+			payload.value = e.firstValue.split(",");
 		} else {
 			payload.value = e.firstValue;
 		}

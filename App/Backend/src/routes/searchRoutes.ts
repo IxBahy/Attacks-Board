@@ -52,9 +52,9 @@ searchRouter.get(
 			console.log("sec");
 			response = await query(queryField, "match", queryValue);
 			// } else if (queryType === "bool" && isStrArray(queryValue)) {
-		} else if (queryType === "bool" && typeof queryValue === "string") {
+		} else if (queryType === "bool" && isStrArray(queryValue)) {
 			console.log("Third");
-			response = await query(queryField, "bool", [queryValue]);
+			response = await query(queryField, "bool", queryValue);
 		} else {
 			res.status(400);
 			res.json({
