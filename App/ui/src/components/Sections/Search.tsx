@@ -28,6 +28,7 @@ import { isStrArray } from "@/Utlis/TypeGuards";
 import { SearchResponse } from "elasticsearch";
 import AttackCard from "../Cards/AttackCard";
 import QueryCard from "../Cards/QueryCard";
+import { searchQuery } from "@/apis/apis";
 type FormObjectEvent = {
 	field:
 		| "mainCategory"
@@ -44,21 +45,7 @@ type FormObjectEvent = {
 	firstValue: string;
 	secondValue?: string | undefined;
 };
-type RequestPayload = {
-	field:
-		| "mainCategory"
-		| "subCategory"
-		| "protocol"
-		| "sourcePort"
-		| "destinationPort"
-		| "name"
-		| "id"
-		| "sourceIP"
-		| "severity"
-		| "authorizedIp";
-	type: "match" | "bool" | "range";
-	value: string | string[];
-};
+
 const Search = () => {
 	const [queryResponse, setQueryResponse] = useState<
 		{ _source: AttackEvent; _score: number }[]
@@ -211,29 +198,7 @@ const Search = () => {
 	};
 	const handleSendRequest = async (payload: RequestPayload) => {
 		if (Object.keys(form.formState.errors).length === 0) {
-			console.log(payload);
-			const params = new URLSearchParams();
-			params.append("field", payload.field);
-			params.append("type", payload.type);
-			if (Array.isArray(payload.value)) {
-				payload.value.forEach((val: string) => params.append("value", val));
-			} else {
-				params.append("value", payload.value);
-			}
-			const result = await fetch(`http://localhost:5000/query?${params}`, {
-				method: "GET",
-			})
-				.then((response) => {
-					if (!response.ok) {
-						throw new Error(response.statusText);
-					}
-					return response.json() as Promise<{
-						data: SearchResponse<AttackEvent>;
-					}>;
-				})
-				.then((data) => {
-					return data.data;
-				});
+			const result = await searchQuery(payload);
 
 			console.log(result.hits.hits);
 

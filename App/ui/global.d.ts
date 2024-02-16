@@ -35,3 +35,18 @@ type AttackEvent = {
 	severity: null | "Low" | "Medium" | "High";
 	authorizedIp: boolean;
 };
+type RequestPayload = {
+	field:
+		| "mainCategory"
+		| "subCategory"
+		| "protocol"
+		| "sourcePort"
+		| "destinationPort"
+		| "name"
+		| "id"
+		| "sourceIP"
+		| "severity"
+		| "authorizedIp";
+	type: "match" | "bool" | "range";
+	value: string | string[];
+};

@@ -68,6 +68,9 @@ searchRouter.get(
 );
 
 searchRouter.get("/count", async (req: Request, res: Response) => {
+	console.log(req.query.index);
+	console.log("55555555555");
+
 	const index = req.query.index as esIndexes;
 	if (!index) {
 		res.status(400);
