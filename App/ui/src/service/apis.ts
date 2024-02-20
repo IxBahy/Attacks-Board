@@ -11,7 +11,6 @@ export const searchQuery = async (
 	} else {
 		params.append("value", payload.value);
 	}
-	// console.log(urlPath);
 
 	const result = await fetch(`${urlPath}/query?${params}`, {
 		method: "GET",

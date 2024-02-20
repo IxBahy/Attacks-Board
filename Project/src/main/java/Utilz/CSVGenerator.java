@@ -1,16 +1,18 @@
 package Utilz;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
 
 public class CSVGenerator {
     private static final BufferedReader br;
-    private  static String splitBy = ",";
+    private  static final String splitBy = ",";
+    private  static final String csvFilePath ="Cybersecurity_attacks.csv";
     static {
         try {
-            br = new BufferedReader(new FileReader("Cybersecurity_attacks.csv"));
+            br = new BufferedReader(new FileReader(csvFilePath));
             br.readLine();
         } catch (FileNotFoundException e) {
             System.out.print("file not found ");
@@ -29,4 +31,37 @@ public class CSVGenerator {
               return line.split(splitBy);
         }
         return null;
-}}
+}
+
+    public static String[] getRandomRow() throws IOException {
+        try {
+            String randomLine = getRandomLineFromCSV(csvFilePath);
+            assert randomLine != null;
+            return randomLine.split(splitBy);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static String getRandomLineFromCSV(String filePath) throws IOException {
+        List<String> lines = new ArrayList<>();
+
+        // Read all lines from the CSV file
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lines.add(line);
+            }
+        }
+
+        if (lines.isEmpty()) {
+            return null;
+        }
+
+        Random random = new Random();
+        int randomIndex = random.nextInt(lines.size());
+
+        return lines.get(randomIndex);
+    }
+
+}
