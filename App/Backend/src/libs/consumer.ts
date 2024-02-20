@@ -12,9 +12,13 @@ const consumer = kafka.consumer({ groupId: GROUP_ID });
 
 export const consume = async (cb: (Buffer) => any) => {
 	await consumer.connect();
-	await consumer.subscribe({ topic, fromBeginning: true });
+	await consumer.subscribe({ topic, fromBeginning: false });
+
 	await consumer.run({
 		eachMessage: async ({ topic, partition, message }) => {
+			console.log(
+				"::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+			);
 			const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`;
 			console.log(`- ${prefix} ${message.key}#${message.value}`);
 			cb(message.value.toString());

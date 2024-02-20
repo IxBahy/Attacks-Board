@@ -2,11 +2,42 @@
 import { useEffect, useRef, useState } from "react";
 import AttackCard from "../Cards/AttackCard";
 import Title from "../ui/Title";
+import { io } from "socket.io-client";
+// import { socket } from "../../service/websocket";
 let i = 0;
+
 const Dashboard = () => {
 	const [attacks, setAttacks] = useState<{ id: number }[]>([]);
 	const [pauseModifications, setPauseModifications] = useState(false);
 	const listRef = useRef<HTMLUListElement>(null);
+
+	const URL = `http://${process.env.BASE_URL}`;
+	useEffect(() => {
+		const socket = io(URL);
+
+		console.log("6655555555");
+		function onConnect() {
+			console.log("connected");
+		}
+
+		function onDisconnect() {
+			console.log("disconnected");
+		}
+		function onAttackEvent(value: string) {
+			// const data = JSON.parse(value);
+			console.log(value);
+		}
+
+		socket.on("connect", onConnect);
+		socket.on("disconnect", onDisconnect);
+		socket.on("attack-event", onAttackEvent);
+
+		return () => {
+			socket.off("connect", onConnect);
+			socket.off("disconnect", onDisconnect);
+			socket.off("attack-event", onAttackEvent);
+		};
+	}, []);
 
 	useEffect(() => {
 		if (pauseModifications) return;
@@ -19,8 +50,8 @@ const Dashboard = () => {
 		return () => clearTimeout(timeout);
 	}, [attacks]);
 
-	const handleAdd = (): false | true => {
-		console.log("test", pauseModifications);
+	const handleAdd = (): boolean => {
+		// console.log("test", pauseModifications);
 
 		if (pauseModifications) {
 			return false;

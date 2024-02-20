@@ -73,20 +73,20 @@ const createQuery = (
 	value: QueryValue
 ): QueryDslQueryContainer => {
 	let query: QueryDslQueryContainer;
-	console.log("here", type, field, value);
+	// console.log("here", type, field, value);
 
 	if (type === "bool" && Array.isArray(value)) {
-		console.log(1);
+		// console.log(1);
 		query = createFilterRequest(field, value);
 	} else if (type === "match" && typeof value === "string") {
-		console.log(2);
+		// console.log(2);
 		query = createMatchRequest(field, value);
 	} else if (
 		type === "range" &&
 		typeof value !== "string" &&
 		isIpRange(value)
 	) {
-		console.log(3);
+		// console.log(3);
 		query = createRangeRequest(field, value);
 	}
 	console.log("there", query);
@@ -106,7 +106,7 @@ const createRangeRequest = (
 		gte: value[0],
 		lte: value[1],
 	};
-	console.log("HERE IS THE QUERY", query);
+	// console.log("HERE IS THE QUERY", query);
 
 	return query;
 };

@@ -28,7 +28,7 @@ import { isStrArray } from "@/Utlis/TypeGuards";
 import { SearchResponse } from "elasticsearch";
 import AttackCard from "../Cards/AttackCard";
 import QueryCard from "../Cards/QueryCard";
-import { searchQuery } from "@/apis/apis";
+import { searchQuery } from "@/service/apis";
 type FormObjectEvent = {
 	field:
 		| "mainCategory"
@@ -200,7 +200,7 @@ const Search = () => {
 		if (Object.keys(form.formState.errors).length === 0) {
 			const result = await searchQuery(payload);
 
-			console.log(result.hits.hits);
+			// console.log(result.hits.hits);
 
 			const top3Results = result.hits.hits
 				// .sort(({ _score: first }, { _score: second }) => second - first)

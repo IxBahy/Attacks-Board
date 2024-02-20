@@ -3,10 +3,10 @@ import * as http from "http";
 import * as socketio from "socket.io";
 
 export const createSocket = (
-	expressServer: express.Express,
-	config: socketio.ServerOptions = {} as socketio.ServerOptions
+	Server: http.Server,
+	config: Partial<socketio.ServerOptions> = {} as Partial<socketio.ServerOptions>
 ): socketio.Server => {
-	const httpServer = http.createServer(expressServer);
-	const io = new socketio.Server(httpServer, config);
+	const io = new socketio.Server(Server, config);
+
 	return io;
 };

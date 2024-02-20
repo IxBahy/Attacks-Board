@@ -1,5 +1,5 @@
 import { CountResponse, SearchResponse } from "elasticsearch";
-
+const urlPath = "http://" + process.env.BASE_URL;
 export const searchQuery = async (
 	payload: RequestPayload
 ): Promise<SearchResponse<AttackEvent>> => {
@@ -11,7 +11,9 @@ export const searchQuery = async (
 	} else {
 		params.append("value", payload.value);
 	}
-	const result = await fetch(`http://localhost:5000/query?${params}`, {
+	// console.log(urlPath);
+
+	const result = await fetch(`${urlPath}/query?${params}`, {
 		method: "GET",
 	})
 		.then((response) => {
@@ -30,7 +32,7 @@ export const searchQuery = async (
 export const indexCount = async (index: esIndexes): Promise<number> => {
 	const params = new URLSearchParams();
 	params.append("index", index);
-	const result = await fetch(`http://localhost:5000/query/count?${params}`, {
+	const result = await fetch(`${urlPath}/query/count?${params}`, {
 		method: "GET",
 	})
 		.then((response) => {
@@ -40,7 +42,7 @@ export const indexCount = async (index: esIndexes): Promise<number> => {
 			return response.json() as Promise<CountResponse>;
 		})
 		.then((data) => {
-			console.log("data", data);
+			// console.log("data", data);
 
 			return data.count;
 		});

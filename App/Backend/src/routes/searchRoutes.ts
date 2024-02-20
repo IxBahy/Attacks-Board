@@ -46,14 +46,14 @@ searchRouter.get(
 			queryType === "range" &&
 			isIpRange(queryValue)
 		) {
-			console.log("First");
+			// console.log("First");
 			response = await query("sourceIP", "range", queryValue);
 		} else if (queryType === "match" && typeof queryValue === "string") {
-			console.log("sec");
+			// console.log("sec");
 			response = await query(queryField, "match", queryValue);
 			// } else if (queryType === "bool" && isStrArray(queryValue)) {
 		} else if (queryType === "bool" && isStrArray(queryValue)) {
-			console.log("Third");
+			// console.log("Third");
 			response = await query(queryField, "bool", queryValue);
 		} else {
 			res.status(400);
@@ -68,8 +68,8 @@ searchRouter.get(
 );
 
 searchRouter.get("/count", async (req: Request, res: Response) => {
-	console.log(req.query.index);
-	console.log("55555555555");
+	// console.log(req.query.index);
+	// console.log("55555555555");
 
 	const index = req.query.index as esIndexes;
 	if (!index) {

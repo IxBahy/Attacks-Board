@@ -31,6 +31,9 @@ const StatusChart = ({ sucsesful, failed }: ChartProps) => {
 				options={options}
 				data={data}
 			/>
+			<h5 className="font-bold font-mono text-gray-400">
+				The Ratio of sucsesful attacks to the failed ones
+			</h5>
 		</>
 	);
 };
