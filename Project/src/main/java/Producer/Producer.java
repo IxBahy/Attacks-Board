@@ -23,10 +23,11 @@ public class Producer {
         do {
             String key = keyIndex + "";
             Event eventData = createAttackEvent(CSVGenerator.getRandomRow());
+//            System.out.println(eventData);
             ProducerRecord<String, Event> record = new ProducerRecord<String, Event>(IConstants.INPUT_TOPIC_NAME, key,eventData );
             RecordMetadata recordMetadata = producer.send(record).get();
             System.out.println("Produced with key: " + key + " Data: " + eventData + " Offset: " + recordMetadata.offset());
-            Thread.sleep(5000);
+            Thread.sleep(100);
             keyIndex++;
         } while (CSVGenerator.getNextRow()!= null);
         } catch (InterruptedException | IOException e) {

@@ -9,6 +9,7 @@ import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.elasticsearch.sink.Elasticsearch7SinkBuilder;
 import org.apache.flink.connector.elasticsearch.sink.ElasticsearchSink;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
@@ -18,6 +19,7 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.http.HttpHost;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Requests;
 
@@ -46,18 +48,18 @@ public class Consumer {
         });
 
         DataStream<Event> alertsStream = getThreats(logStream);
-        Thread alertsThread = new Thread(() -> {
-            try {
-                stream2Elastic(alertsStream, env, IConstants.esAlerts);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+//        Thread alertsThread = new Thread(() -> {
+//            try {
+//                stream2Elastic(alertsStream, env, IConstants.esAlerts);
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
         logsThread.start();
-        alertsThread.start();
+//        alertsThread.start();
         KafkaSink<String> sink =createKafkaSink(IConstants.OUTPUT_TOPIC_NAME,new SimpleStringSchema());
-        alertsStream.map(Event::toString).sinkTo(sink).name("kafka-sink");
-
+            alertsStream.map(Event::toString).sinkTo(sink).name("kafka-sink");
+        alertsStream.print();
         env.execute("test");
     }
 
@@ -74,7 +76,6 @@ public class Consumer {
 
     private static DataStream<Event> getThreats(DataStream<Event> dataStream) {
         return dataStream.filter(event -> isThreat(event));
-
     }
 
     private static boolean isThreat(Event attack) {
@@ -165,19 +166,24 @@ public class Consumer {
                 .index(index)
                 .id(id)
                 .source(json);
-        if (Objects.equals(index, IConstants.esAlerts)) {
-            System.out.println(" req sent :::" + request);
-        }
+//        if (Objects.equals(index, IConstants.esAlerts)) {
+//            System.out.println(" req sent :::" + request);
+//        }
         return request;
     }
 
     private static <T> KafkaSink<T> createKafkaSink(String topic, SerializationSchema<T> serializationSchema ) {
-
-        return KafkaSink.<T>builder().setBootstrapServers(IConstants.KAFKA_BROKERS)
+        return KafkaSink.<T>builder()
+                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                .setBootstrapServers(IConstants.KAFKA_BROKERS)
+                .setProperty("commit.offsets.on.checkpoint", "true")
+                .setProperty("transaction.timeout.ms", "60000")
+                .setProperty("max.poll.records", "1")
+                .setProperty("transaction.max.timeout.ms", "600000")
                 .setRecordSerializer(KafkaRecordSerializationSchema.builder()
-                        .setTopic(topic)
-                        .setValueSerializationSchema(serializationSchema)
-                        .build()
+                .setTopic(topic)
+                .setValueSerializationSchema(serializationSchema)
+                .build()
                 )
                 .build();
     }

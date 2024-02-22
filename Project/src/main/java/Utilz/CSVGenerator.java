@@ -1,10 +1,7 @@
 package Utilz;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class CSVGenerator {
     private static final BufferedReader br;
@@ -37,7 +34,14 @@ public class CSVGenerator {
         try {
             String randomLine = getRandomLineFromCSV(csvFilePath);
             assert randomLine != null;
-            return randomLine.split(splitBy);
+            String[] valueArr=randomLine.split(splitBy);
+            if (valueArr.length == 7){
+                System.out.println("here");
+            return valueArr;
+            }else{
+                System.out.println("there");
+                return getRandomRow();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
