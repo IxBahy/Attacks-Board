@@ -188,7 +188,9 @@ const Search = () => {
 				});
 			}
 		} else if (e.type === "bool") {
-			payload.value = e.firstValue.split(",");
+			payload.value = isStrArray(e.firstValue.includes(","))
+				? e.firstValue.split(",")
+				: [e.firstValue, " "];
 		} else {
 			payload.value = e.firstValue;
 		}

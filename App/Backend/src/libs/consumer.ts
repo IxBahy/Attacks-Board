@@ -20,7 +20,7 @@ export const consume = async (cb: (Buffer) => any) => {
 				"::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 			);
 			const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`;
-			console.log(`- ${prefix} ${message.key}#${message.value}`);
+			console.log(`- ${prefix} #${message.value}`);
 			cb(message.value.toString());
 		},
 	});

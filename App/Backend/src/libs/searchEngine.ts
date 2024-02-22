@@ -17,7 +17,13 @@ type allowedQueryTypes<T extends AttackFields> = T extends "sourceIP"
 	? QueryTypes
 	: Exclude<QueryTypes, "range">;
 type QueryValue = string | [IpAddress, IpAddress] | string[];
-const client = new Client({ node: process.env.ELASTIC_URL });
+const client = new Client({
+	node: process.env.ELASTIC_URL,
+	auth: {
+		username: "elastic",
+		password: "asdasd",
+	},
+});
 
 ////////////////////////////////// Count FUNCTION //////////////////////////////////
 

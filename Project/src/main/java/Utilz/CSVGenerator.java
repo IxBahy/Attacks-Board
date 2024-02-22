@@ -5,8 +5,9 @@ import java.util.*;
 
 public class CSVGenerator {
     private static final BufferedReader br;
-    private  static final String splitBy = ",";
-    private  static final String csvFilePath ="Cybersecurity_attacks.csv";
+    private static final String splitBy = ",";
+    private static final String csvFilePath = "Cybersecurity_attacks.csv";
+
     static {
         try {
             br = new BufferedReader(new FileReader(csvFilePath));
@@ -19,27 +20,27 @@ public class CSVGenerator {
             throw new RuntimeException(e);
         }
     }
+
     public static BufferedReader getScanner() {
         return br;
     }
+
     public static String[] getNextRow() throws IOException {
-    String line ;
-        if ((line=br.readLine()) != null){
-              return line.split(splitBy);
+        String line;
+        if ((line = br.readLine()) != null) {
+            return line.split(splitBy);
         }
         return null;
-}
+    }
 
     public static String[] getRandomRow() throws IOException {
         try {
             String randomLine = getRandomLineFromCSV(csvFilePath);
             assert randomLine != null;
-            String[] valueArr=randomLine.split(splitBy);
-            if (valueArr.length == 7){
-                System.out.println("here");
-            return valueArr;
-            }else{
-                System.out.println("there");
+            String[] valueArr = randomLine.split(splitBy);
+            if (valueArr.length == 7) {
+                return valueArr;
+            } else {
                 return getRandomRow();
             }
         } catch (IOException e) {
@@ -47,6 +48,7 @@ public class CSVGenerator {
         }
         return null;
     }
+
     public static String getRandomLineFromCSV(String filePath) throws IOException {
         List<String> lines = new ArrayList<>();
 

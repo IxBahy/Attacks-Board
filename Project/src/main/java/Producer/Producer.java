@@ -27,7 +27,7 @@ public class Producer {
             ProducerRecord<String, Event> record = new ProducerRecord<String, Event>(IConstants.INPUT_TOPIC_NAME, key,eventData );
             RecordMetadata recordMetadata = producer.send(record).get();
             System.out.println("Produced with key: " + key + " Data: " + eventData + " Offset: " + recordMetadata.offset());
-            Thread.sleep(100);
+            Thread.sleep(2000);
             keyIndex++;
         } while (CSVGenerator.getNextRow()!= null);
         } catch (InterruptedException | IOException e) {
@@ -47,6 +47,8 @@ public class Producer {
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EventSerializer.class.getName());
         properties.setProperty(ProducerConfig.CLIENT_ID_CONFIG, IConstants.CLIENT_ID);
+        properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        properties.put("acks","all");
         return properties;
     }
     public static Event createAttackEvent(String[] dataArray){

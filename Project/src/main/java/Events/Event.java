@@ -26,9 +26,6 @@ public class Event {
     public boolean authorizedIp=true;
     public  Event(){}
     public Event(String[] props){
-        System.out.println(Arrays.toString(props));
-        System.out.println(props.length);
-
         id= UUID.randomUUID();
         mainCategory=props[0];
         subCategory=props[1];

@@ -48,19 +48,19 @@ public class Consumer {
         });
 
         DataStream<Event> alertsStream = getThreats(logStream);
-//        Thread alertsThread = new Thread(() -> {
-//            try {
-//                stream2Elastic(alertsStream, env, IConstants.esAlerts);
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
+        Thread alertsThread = new Thread(() -> {
+            try {
+                stream2Elastic(alertsStream, env, IConstants.esAlerts);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         logsThread.start();
-//        alertsThread.start();
+        alertsThread.start();
         KafkaSink<String> sink =createKafkaSink(IConstants.OUTPUT_TOPIC_NAME,new SimpleStringSchema());
-            alertsStream.map(Event::toString).sinkTo(sink).name("kafka-sink");
+            alertsStream.map(Event::toString).sinkTo(sink);
         alertsStream.print();
-        env.execute("test");
+        env.execute("output-env");
     }
 
     private static <T> KafkaSource<T> createKafkaSource(String topic, DeserializationSchema<T> deserializationSchema) {
@@ -149,9 +149,11 @@ public class Consumer {
                 .setBulkFlushMaxActions(1)
                 .setHosts(new HttpHost("127.0.0.1", 9200, "http"))
                 .setEmitter((element, context, indexer) -> indexer.add(createIndexRequest(esIndex, element)))
+                .setConnectionUsername("elastic")
+                .setConnectionPassword("asdasd")
                 .build();
         stream.sinkTo(esSink).name(esIndex);
-        env.execute("elastic-test");
+        env.execute();
 
     }
 
@@ -173,18 +175,20 @@ public class Consumer {
     }
 
     private static <T> KafkaSink<T> createKafkaSink(String topic, SerializationSchema<T> serializationSchema ) {
+        System.out.println(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::CALLED::::::::::::::::::::::::::::::::::::::::");
         return KafkaSink.<T>builder()
-                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
+
                 .setBootstrapServers(IConstants.KAFKA_BROKERS)
-                .setProperty("commit.offsets.on.checkpoint", "true")
+                .setRecordSerializer(KafkaRecordSerializationSchema.builder()
+                    .setTopic(topic)
+                    .setValueSerializationSchema(serializationSchema)
+                    .build()
+                )
                 .setProperty("transaction.timeout.ms", "60000")
                 .setProperty("max.poll.records", "1")
                 .setProperty("transaction.max.timeout.ms", "600000")
-                .setRecordSerializer(KafkaRecordSerializationSchema.builder()
-                .setTopic(topic)
-                .setValueSerializationSchema(serializationSchema)
-                .build()
-                )
+//                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
+//                .setTransactionalIdPrefix("output")
                 .build();
     }
 }

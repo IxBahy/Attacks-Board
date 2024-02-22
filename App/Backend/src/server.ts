@@ -43,6 +43,5 @@ const io: socketio.Server = createSocket(httpServer, {
 io.on("connection", handleConnection);
 
 consume((value: string) => {
-	console.log(value);
 	io.sockets.emit("attack-event", value);
 });
